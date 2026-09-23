@@ -82,17 +82,6 @@ table{min-width:620px}
   .container,.main,.content,.page{padding-left:7px!important;padding-right:7px!important}
   button{padding:9px 11px}
 }
-
-@media print{
-  body{background:#fff!important} header,#connectionStatus,.backbar,.filters,.pdf-controls,.toolbar,.footer,.notice,.upload,.no-print{display:none!important}
-  .container{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
-  .page{display:none!important}.page.print-target{display:block!important}
-  .panel,.card{box-shadow:none!important;border:0!important;border-radius:0!important;margin:0!important;padding:4mm!important}
-  .table-wrap{overflow:visible!important;max-height:none!important}
-  table{min-width:0!important;width:100%!important;font-size:9pt!important}
-  th,td{padding:4px!important;font-size:9pt!important}
-  @page{margin:8mm;size:A4 var(--print-orientation,landscape)}
-}
 </style></head>
 <body>
 <section id="loginPage" class="login-shell">
@@ -114,21 +103,21 @@ table{min-width:620px}
 <section id="dashboard" class="page"><div class="filters"><label>जनपद<select id="market"><option value="all">सभी जनपद</option><option>Bulandshahr</option></select></label><label>वस्तु<select id="commodity"><option value="all">सभी 41 वस्तुएँ</option></select></label><button onclick="resetFilters()">Reset</button><button onclick="showPage('pmc')">📄 23 वस्तु</button><button onclick="showPage('pmc2')">📑 Additional 18</button></div><div class="panel" style="padding:14px"><div class="toolbar" style="justify-content:space-between"><b>📍 जनपदवार Online Live Slide</b><span class="live-dot">INTERNET LIVE</span></div><div class="online-slide"><span id="tehsilSlide" style="font-size:18px;font-weight:700;min-height:28px">Bulandshahr — Live price summary</span></div><div class="small muted">Internet Live: उपलब्ध online commodity/market source से price data refresh होता है; local saved entries fallback के रूप में रहती हैं।</div></div><div class="cards"><div class="card">📦 कुल रिकॉर्ड<b id="records">0</b><span class="muted">Day-wise entries</span></div><div class="card">🛒 वस्तुएँ<b id="items">40</b><span class="muted">23 + Additional</span></div><div class="card">💰 औसत भाव<b id="avg">₹0.00</b><span class="muted">Latest dataset</span></div><div class="card">📈 कुल बदलाव<b id="change">0%</b><span class="muted">Live period trend</span></div></div><div class="grid"><div class="panel"><div class="toolbar" style="justify-content:space-between"><h2>📈 Price Trend</h2><span class="live-dot">LIVE</span></div><canvas id="chart"></canvas><div id="liveClock" class="live-clock"></div></div><div class="panel"><h2>🤖 AI Forecast</h2><p class="muted">चयनित वस्तु</p><h2 id="forecastItem">गेहूँ</h2><p>अगले दिन अनुमानित भाव</p><h1 id="forecast">₹35.80</h1><span class="badge" id="trend">बढ़ने की संभावना</span></div></div><div class="panel"><h2>⚠️ Price Change Detection</h2><div class="table-wrap"><table><thead><tr><th>वस्तु</th><th>पिछला भाव</th><th>आज का भाव</th><th>बदलाव</th><th>स्थिति</th></tr></thead><tbody id="alerts"></tbody></table></div></div><div class="panel"><h2>📋 Latest Prices</h2><div class="table-wrap"><table><thead><tr><th>तारीख</th><th>बाजार</th><th>वस्तु</th><th>भाव</th></tr></thead><tbody id="data"></tbody></table></div></div></section>
 
 <section id="pmc" class="page">
-<div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">PMC Data / 23 वस्तुएँ</span></div><div class="panel pmc-head"><div class="toolbar" style="justify-content:space-between"><div><h2>📄 PMC Data — 23 वस्तुएँ</h2><p class="muted">Date चुनकर उस दिन की saved entry खोलें। आज की तारीख live रहेगी और पुरानी तारीख की entry भी निकाली जा सकती है।</p></div><div class="toolbar"><button class="success" onclick="saveData(1)">💾 Save Changes</button><button onclick="downloadPdf(1)">📥 PDF</button><button onclick="downloadExcel(1)">📊 Excel</button><label class="no-print" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#687386">Print <select id="printOrientation1"><option value="landscape" selected>Landscape</option><option value="portrait">Portrait</option></select></label><button class="no-print" onclick="printPage('pmc',1)">🖨️ Print</button></div></div>
+<div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">PMC Data / 23 वस्तुएँ</span></div><div class="panel pmc-head"><div class="toolbar" style="justify-content:space-between"><div><h2>📄 PMC Data — 23 वस्तुएँ</h2><p class="muted">Date चुनकर उस दिन की saved entry खोलें। आज की तारीख live रहेगी और पुरानी तारीख की entry भी निकाली जा सकती है।</p></div><div class="toolbar"><button class="success" onclick="saveData(1)">💾 Save Changes</button><button onclick="downloadPdf(1)">📥 PDF</button><button onclick="downloadExcel(1)">📊 Excel</button></div></div>
 <div class="filters" style="margin:12px 0"><label>Tehsil<select id="pmcTehsil1" onchange="changePmcTehsil(1)"></select></label><label>Block<select id="pmcBlock1" onchange="changePmcBlock(1)"></select></label><button type="button" class="secondary" onclick="addTehsil()">➕ Add Tehsil</button><button type="button" class="secondary" onclick="addBlock()">➕ Add Block</button><span class="small muted">Shop names are saved block-wise with the selected market.</span><label>PMC Date<input type="date" id="pmcDate1" onchange="loadReportDate(1)"></label><button type="button" onclick="setReportToday(1)">📅 Today / Live Date</button><span id="pmcLiveDate1" class="live-clock" style="align-self:center"></span><span id="pmcDateStatus1" class="small muted" style="align-self:center"></span></div><div class="pdf-controls"><label>PDF Border <select id="pdfBorder1"><option value="1">Dark</option><option value="0.55" selected>Light</option><option value="0.25">Very Light</option></select></label><label>Font Size <input id="fontSize1" type="number" min="5" max="14" step="0.5" value="6"></label><label>Alignment <select id="align1"><option value="left">Left</option><option value="center" selected>Center</option><option value="right">Right</option></select></label><label>Market + Shop PDF Wrap <select id="pdfWrap1"><option value="auto" selected>Auto Wrap</option><option value="wrap">Wrap</option><option value="nowrap">No Wrap</option></select></label></div>
 <div class="panel" style="padding:12px;margin-top:15px"><div class="toolbar" style="justify-content:space-between"><b>Editable 23-Commodity Table</b><span class="small muted">Market-1/2/3, Retail Average और Wholesale values edit करें</span></div><div class="table-wrap"><table><thead><tr><th>S.No.</th><th>Commodity & Specifications</th><th>Unit</th><th>Market-1</th><th>Market-2</th><th>Market-3</th><th>Retail Avg.</th><th>Wholesale Market Price</th></tr></thead><tbody id="pmcTable"></tbody></table></div></div>
 <div class="panel"><div class="toolbar" style="justify-content:space-between"><h3>👁️ Original PMC PDF</h3><button class="secondary" onclick="toggleOriginal(1)">Hide / Show</button></div><div id="original1" class="hidden"><iframe class="pdf-frame" src="pmc/pmc-file-one.pdf"></iframe></div></div></div>
 </section>
 
 <section id="pmc2" class="page">
-<div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">PMC Additional / 18 वस्तुएँ</span></div><div class="panel pmc-head"><div class="toolbar" style="justify-content:space-between"><div><h2>📑 PMC Additional Report</h2><p class="muted">Date चुनकर उस दिन की saved entry खोलें। पुरानी तारीख की entry भी निकाली जा सकती है।</p></div><div class="toolbar"><button class="success" onclick="saveData(2)">💾 Save Changes</button><button onclick="downloadPdf(2)">📥 PDF</button><button onclick="downloadExcel(2)">📊 Excel</button><label class="no-print" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#687386">Print <select id="printOrientation2"><option value="landscape" selected>Landscape</option><option value="portrait">Portrait</option></select></label><button class="no-print" onclick="printPage('pmc2',2)">🖨️ Print</button></div></div>
+<div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">PMC Additional / 18 वस्तुएँ</span></div><div class="panel pmc-head"><div class="toolbar" style="justify-content:space-between"><div><h2>📑 PMC Additional Report</h2><p class="muted">Date चुनकर उस दिन की saved entry खोलें। पुरानी तारीख की entry भी निकाली जा सकती है।</p></div><div class="toolbar"><button class="success" onclick="saveData(2)">💾 Save Changes</button><button onclick="downloadPdf(2)">📥 PDF</button><button onclick="downloadExcel(2)">📊 Excel</button></div></div>
 <div class="filters" style="margin:12px 0"><label>Tehsil<select id="pmcTehsil2" onchange="changePmcTehsil(2)"></select></label><label>Block<select id="pmcBlock2" onchange="changePmcBlock(2)"></select></label><button type="button" class="secondary" onclick="addTehsil()">➕ Add Tehsil</button><button type="button" class="secondary" onclick="addBlock()">➕ Add Block</button><span class="small muted">Shop names are saved block-wise with the selected market.</span><label>Additional Date<input type="date" id="pmcDate2" onchange="loadReportDate(2)"></label><button type="button" onclick="setReportToday(2)">📅 Today / Live Date</button><span id="pmcLiveDate2" class="live-clock" style="align-self:center"></span><span id="pmcDateStatus2" class="small muted" style="align-self:center"></span></div><div class="pdf-controls"><label>PDF Border <select id="pdfBorder2"><option value="1">Dark</option><option value="0.55" selected>Light</option><option value="0.25">Very Light</option></select></label><label>Font Size <input id="fontSize2" type="number" min="5" max="14" step="0.5" value="6"></label><label>Alignment <select id="align2"><option value="left">Left</option><option value="center" selected>Center</option><option value="right">Right</option></select></label><label>Market + Shop PDF Wrap <select id="pdfWrap2"><option value="auto" selected>Auto Wrap</option><option value="wrap">Wrap</option><option value="nowrap">No Wrap</option></select></label></div>
 <div class="panel" style="padding:12px;margin-top:15px"><div class="toolbar" style="justify-content:space-between"><b>Editable Additional Table</b><span class="small muted">Rows can be changed before generating reports</span></div><div class="table-wrap"><table><thead><tr><th>S.No.</th><th>Commodity</th><th>Unit</th><th>Market-1</th><th>Market-2</th><th>Market-3</th><th>Retail Avg.</th></tr></thead><tbody id="pmc2Table"></tbody></table></div></div>
 <div class="panel"><div class="toolbar" style="justify-content:space-between"><h3>👁️ Original Additional PDF</h3><button class="secondary" onclick="toggleOriginal(2)">Hide / Show</button></div><div id="original2" class="hidden"><iframe class="pdf-frame" src="pmc/1-2-file-for-pmc.pdf"></iframe></div></div></div>
 </section>
 
 <section id="profile" class="page"><div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">Profile / Office Details</span></div><div class="panel"><h2>👤 Profile & Office Details</h2><p class="muted">इन details को edit करने पर generated PDF के header में भी यही details आएँगी।</p><div class="profile-grid"><label>State / U.T.<input id="pState"></label><label>Centre / District<input id="pCentre"></label><label>Office / Department<input id="pOffice"></label><label>Data Entry Operator / Price Collector<input id="pOperator"></label><label>Mobile No.<input id="pMobile"></label><label>Email<input id="pEmail"></label><label>Designation<input id="pDesignation"></label><label>Address<input id="pAddress"></label><label>Tehsil<input id="pTehsil"></label></div><div class="toolbar" style="margin-top:15px"><button class="success" onclick="saveProfile()">💾 Save Profile</button><button class="secondary" onclick="loadProfile()">↻ Reload</button></div></div></section>
-<section id="reports" class="page"><div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">Reports</span></div><div class="panel"><h2>📥 Combined Reports</h2><p class="muted">23 वस्तुओं की PDF एक ही A4 landscape page में और Additional report अलग page/section में download करें। Excel में भी दोनों अलग-अलग sheets में मिलेंगे।</p><div class="filters"><label>Tehsil<select id="reportTehsil" onchange="changeReportTehsil()"></select></label><label>Block<select id="reportBlock" onchange="changeReportBlock()"></select></label><label>Report Date<input type="date" id="reportDate" onchange="loadCombinedReportDate()"></label><button onclick="setCombinedReportToday()">📅 Today / Live Date</button><span id="reportDateStatus" class="small muted"></span></div><div class="toolbar"><button class="success" onclick="downloadCombinedPdf()">📥 Download Combined PDF</button><button onclick="downloadCombinedExcel()">📊 Download Combined Excel</button><label class="no-print" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#687386">Print <select id="printOrientationReport"><option value="landscape" selected>Landscape</option><option value="portrait">Portrait</option></select></label><button class="no-print" onclick="printPage('reports','Report')">🖨️ Print</button></div><div class="notice"><b>PDF structure:</b> Page/Section 1 = 23 वस्तु PMC • Page/Section 2 = Additional PMC. प्रत्येक section पर office/form header रहेगा।</div></div></section>
+<section id="reports" class="page"><div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">Reports</span></div><div class="panel"><h2>📥 Combined Reports</h2><p class="muted">23 वस्तुओं की PDF एक ही A4 landscape page में और Additional report अलग page/section में download करें। Excel में भी दोनों अलग-अलग sheets में मिलेंगे।</p><div class="filters"><label>Tehsil<select id="reportTehsil" onchange="changeReportTehsil()"></select></label><label>Block<select id="reportBlock" onchange="changeReportBlock()"></select></label><label>Report Date<input type="date" id="reportDate" onchange="loadCombinedReportDate()"></label><button onclick="setCombinedReportToday()">📅 Today / Live Date</button><span id="reportDateStatus" class="small muted"></span></div><div class="toolbar"><button class="success" onclick="downloadCombinedPdf()">📥 Download Combined PDF</button><button onclick="downloadCombinedExcel()">📊 Download Combined Excel</button></div><div class="notice"><b>PDF structure:</b> Page/Section 1 = 23 वस्तु PMC • Page/Section 2 = Additional PMC. प्रत्येक section पर office/form header रहेगा।</div></div></section>
 </div><div class="footer">Price Monitoring AI • Internet Live Mode • Shared data server/database पर sync होता है • Browser में temporary cache भी रहता है</div></div>
 <script>
 const DEFAULT1=[[1,"Rice (Loose)","1KG",40,42,40,41,3550],[2,"Wheat (Loose)","1KG",26,26,26,26,2460],[3,"Atta (Wheat) (Loose)","1KG",30,32,30,31,2900],[4,"Gram Dal (Loose)","1KG",75,76,75,76,7450],[5,"Tur/Arhar Dal (Loose)","1KG",90,92,90,91,9000],[6,"Urad Dal (Split (washed, Dhuli) (Loose)","1KG",90,92,92,91,9000],[7,"Moong Dal","1KG",90,90,90,90,8800],[8,"Masoor Dal (Split washed, Dhuli) (loose)","1KG",80,80,80,80,7660],[9,"Broken Rice","1KG",45,44,45,44,3600],[10,"Groundnut Oil (Packed)*","1KG",0,0,0,0,0],[11,"Mustard Oil (Packed)*","1KG",170,175,172,173,16000],[12,"Vanaspati Oil (Packed)*","1KG",150,155,155,153,14000],[13,"Soya Oil (Packed)*","1KG",160,155,160,158,15500],[14,"Sunflower Oil (Packed)*","1KG",155,150,154,152,14500],[15,"Palm Oil (Packed)*","1KG",154,159,154,156,13297],[16,"Potato","1KG",20,20,20,20,1400],[17,"Onion","1KG",40,40,40,40,3500],[18,"Tomato","1KG",40,45,45,45,3460],[19,"Sugar (Loose)","1KG",45,50,45,46,4450],[20,"Gur (Loose)","1KG",50,48,50,49,4500],[21,"Milk* (Liquid)","1ltr",70,68,70,69,6700],[22,"Tea (Loose)","1KG",200,200,200,203,19500],[23,"Salt Pack (Iodised)","1KG",0,0,0,0,0]];
@@ -242,13 +231,16 @@ function updateTehsilSlide(){const names=[...new Set(dashboardRecords().map(r=>r
 function startLive(){
   clearInterval(tehsilTimer);
   tehsilTimer=setInterval(()=>{
-    // Re-read saved day-wise data so the dashboard reflects the latest local browser state.
+    // Background check only; redraw dashboard when saved data actually changed.
     try{
-      const raw=localStorage.getItem('pmcDailyEntries');
-      if(raw) dailyEntries=JSON.parse(raw)||[];
+      const raw=localStorage.getItem('pmcDailyEntries')||'[]';
+      if(raw!==window.__pmcLastDailyRaw){
+        window.__pmcLastDailyRaw=raw;
+        dailyEntries=JSON.parse(raw)||[];
+        renderDashboard();
+      }
     }catch(e){}
-    renderDashboard();
-  },5000);
+  },60000);
 }
 window.addEventListener('storage', e=>{
   if(e.key==='pmcDailyEntries'){
@@ -344,19 +336,10 @@ function addTable(doc,rows,title,subtitle,dateText,which=2){
   });
 }
 function safeFile(v){return String(v||'Tehsil').replace(/[^a-zA-Z0-9_-]+/g,'_')}
-function printPage(pageId,which){
-  document.querySelectorAll('.page.print-target').forEach(el=>el.classList.remove('print-target'));
-  const page=document.getElementById(pageId); if(!page)return;
-  page.classList.add('print-target');
-  const orientation=document.getElementById('printOrientation'+which)?.value||'landscape';
-  document.documentElement.style.setProperty('--print-orientation',orientation);
-  setTimeout(()=>{window.print(); setTimeout(()=>page.classList.remove('print-target'),500)},100);
-}
 function downloadPdf(which){
   if(!window.jspdf){alert('PDF library offline उपलब्ध नहीं है। Internet मिलने पर PDF export फिर उपलब्ध होगा।');return;}
   const {jsPDF}=window.jspdf,rows=which===1?pmcData:pmcData2,date=document.getElementById('pmcDate'+which)?.value||todayISO();
-  const orientation=document.getElementById('printOrientation'+which)?.value||'landscape';
-  const doc=new jsPDF({orientation,unit:'mm',format:'a4'});
+  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   if(which===1){addTableCompact22(doc,rows,date,1);doc.save('PMC_23_Commodities_'+safeFile(selectedTehsil+'_'+selectedBlock)+'_'+date+'.pdf')}
   else{addTable(doc,rows,'PERFORMA FOR PRICE COLLECTION - ADDITIONAL COMMODITIES','Additional Retail Market Prices',date,2);doc.save('PMC_Additional_'+safeFile(selectedTehsil+'_'+selectedBlock)+'_'+date+'.pdf')}
 }
@@ -384,7 +367,7 @@ function addTableCompact22(doc,rows,dateText,which=1){
 }
 function downloadCombinedPdf(){
   if(!window.jspdf){alert('PDF library offline उपलब्ध नहीं है। Internet मिलने पर PDF export फिर उपलब्ध होगा।');return;}
-  const {jsPDF}=window.jspdf,orientation=document.getElementById('printOrientationReport')?.value||'landscape',doc=new jsPDF({orientation,unit:'mm',format:'a4'});
+  const {jsPDF}=window.jspdf,doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const d1=document.getElementById('pmcDate1')?.value||todayISO(),d2=document.getElementById('pmcDate2')?.value||d1;
   const rdate=document.getElementById('reportDate')?.value||d1; const d1x=(rdate||d1),d2x=(rdate||d2); const snap1=pmcSnapshots1[snapshotKey(selectedTehsil,d1x)] || (selectedTehsil==='Bulandshahr'?pmcSnapshots1[d1x]:null),snap2=pmcSnapshots2[snapshotKey(selectedTehsil,d2x)] || (selectedTehsil==='Bulandshahr'?pmcSnapshots2[d2x]:null); const rows1=snap1?.rows||pmcData,rows2=snap2?.rows||pmcData2; if(snap1?.markets)marketNames=structuredClone(snap1.markets); addTableCompact22(doc,rows1,d1x,1);doc.addPage(); if(snap2?.markets)marketNames=structuredClone(snap2.markets); addTable(doc,rows2,'PERFORMA FOR PRICE COLLECTION - ADDITIONAL COMMODITIES','SECTION 2 — ADDITIONAL COMMODITIES',d2x,2);
   doc.save('PMC_Combined_23_and_Additional_'+safeFile(selectedTehsil+'_'+selectedBlock)+'_'+d1x+'.pdf');
@@ -411,7 +394,13 @@ function applyServerState(st){if(!st)return;Object.entries(st).forEach(([k,v])=>
 async function syncFromServer(){try{const r=await fetch(API_BASE+'/api/state',{credentials:'include',cache:'no-store'});if(r.ok){const j=await r.json();if(j.state)applyServerState(j.state)}}catch(e){console.warn('Server sync unavailable; using local browser data.')}}
 async function syncToServer(){if(syncBusy||!syncDirty)return;syncBusy=true;try{const r=await fetch(API_BASE+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({state:clientState()})});if(r.ok)syncDirty=false}catch(e){console.warn('Server save unavailable; local data retained.')}finally{syncBusy=false}}
 function scheduleServerSync(){clearTimeout(syncTimer);syncTimer=setTimeout(syncToServer,350)}
-function startInternetSync(){syncFromServer();setInterval(()=>{if(!syncDirty)syncFromServer();syncToServer()},5000)}
+let internetSyncStarted=false, internetSyncTimer=null;
+function startInternetSync(){
+  if(internetSyncStarted)return;
+  internetSyncStarted=true;
+  syncFromServer();
+  internetSyncTimer=setInterval(()=>{if(!syncDirty)syncFromServer();syncToServer()},60000);
+}
 function todayISO(){return new Date().toISOString().slice(0,10)}
 function formatDate(d){if(!d)return '';const [y,m,day]=String(d).split('-');return day&&m&&y?`${day}-${m}-${y}`:String(d)}
 function getDateInput(which){return document.getElementById('pmcDate'+which)}
