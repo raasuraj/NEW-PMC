@@ -82,7 +82,7 @@ table{min-width:620px}
   .container,.main,.content,.page{padding-left:7px!important;padding-right:7px!important}
   button{padding:9px 11px}
 }
-</style></head>
+.pmc-editing .pmc-head{outline:2px solid #1976d2;outline-offset:-2px}.pmc-editing .edit-input:not(.avg-input){background:#fffdf2}</style></head>
 <body>
 <section id="loginPage" class="login-shell">
 <div class="panel" style="width:min(450px,92%);padding:32px">
@@ -232,7 +232,7 @@ function startLive(){
   clearInterval(tehsilTimer);
   tehsilTimer=setInterval(()=>{
     // Do not redraw while a correction is being typed.
-    if(userEditing || document.hidden) return;
+    if(userEditing || document.hidden || isEditPage()) return;
     try{
       const raw=localStorage.getItem('pmcDailyEntries')||'[]';
       if(raw!==window.__pmcLastDailyRaw){
@@ -244,7 +244,7 @@ function startLive(){
   },60000);
 }
 window.addEventListener('storage', e=>{
-  if(userEditing) return;
+  if(userEditing || isEditPage()) return;
   if(e.key==='pmcDailyEntries'){
     try{dailyEntries=e.newValue?JSON.parse(e.newValue):[];}catch(err){dailyEntries=[];}
     renderHistory();
@@ -403,13 +403,16 @@ function startInternetSync(){
   internetSyncStarted=true;
   syncFromServer();
   internetSyncTimer=setInterval(()=>{
-    // Never redraw/replace the PMC tables while the user is correcting a value.
-    if(!syncDirty && !userEditing && !document.hidden) syncFromServer();
-    if(!userEditing) syncToServer();
+    // PMC correction mode: NEVER pull or push background state while the edit screen is open.
+    // Data is synchronized explicitly by Save Changes.
+    if(isEditPage() || userEditing || document.hidden) return;
+    if(!syncDirty) syncFromServer();
+    else syncToServer();
   },60000);
 }
-function beginUserEditing(){userEditing=true;}
-function endUserEditing(){setTimeout(()=>{userEditing=false;},800);}
+function isEditPage(){return !!document.querySelector('#pmc.page.active,#pmc2.page.active');}
+function beginUserEditing(){userEditing=true;document.body.classList.add('pmc-editing');}
+function endUserEditing(){setTimeout(()=>{userEditing=false;document.body.classList.remove('pmc-editing');},1200);}
 function installEditProtection(){
   document.addEventListener('focusin',e=>{
     if(e.target && (e.target.matches('.edit-input') || e.target.matches('.market-name') || e.target.closest('#pmcTable,#pmc2Table'))) beginUserEditing();
@@ -420,7 +423,7 @@ function installEditProtection(){
   document.addEventListener('input',e=>{
     if(e.target && e.target.matches('.edit-input')) userEditing=true;
   });
-  document.addEventListener('visibilitychange',()=>{ if(!document.hidden && !userEditing && !syncDirty) syncFromServer(); });
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden && !userEditing && !syncDirty && !isEditPage()) syncFromServer(); });
 }
 
 function todayISO(){return new Date().toISOString().slice(0,10)}
