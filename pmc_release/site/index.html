@@ -231,7 +231,8 @@ function updateTehsilSlide(){const names=[...new Set(dashboardRecords().map(r=>r
 function startLive(){
   clearInterval(tehsilTimer);
   tehsilTimer=setInterval(()=>{
-    // Background check only; redraw dashboard when saved data actually changed.
+    // Do not redraw while a correction is being typed.
+    if(userEditing || document.hidden) return;
     try{
       const raw=localStorage.getItem('pmcDailyEntries')||'[]';
       if(raw!==window.__pmcLastDailyRaw){
@@ -243,6 +244,7 @@ function startLive(){
   },60000);
 }
 window.addEventListener('storage', e=>{
+  if(userEditing) return;
   if(e.key==='pmcDailyEntries'){
     try{dailyEntries=e.newValue?JSON.parse(e.newValue):[];}catch(err){dailyEntries=[];}
     renderHistory();
@@ -390,17 +392,37 @@ let syncTimer=null, syncBusy=false, syncDirty=false;
 function loadObj(key,def){try{const x=localStorage.getItem(key);return x?JSON.parse(x):structuredClone(def)}catch{return structuredClone(def)}}
 function saveObj(key,val){localStorage.setItem(key,JSON.stringify(val)); syncDirty=true; scheduleServerSync()}
 function clientState(){const keys=['pmcEditable1','pmcEditable2','pmcProfile','pmcMarkets','pmcTehsilList','pmcSelectedTehsil','pmcSelectedBlock','pmcTehsilBlocks','pmcTehsilMarkets','pmcTehsilShopNames','pmcTehsilCurrent1','pmcTehsilCurrent2','pmcDailyEntries','pmcSnapshots1','pmcSnapshots2'];const out={};keys.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)out[k]=JSON.parse(v)});return out}
-function applyServerState(st){if(!st)return;Object.entries(st).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));profile=loadObj('pmcProfile',DEFAULT_PROFILE);tehsilList=loadObj('pmcTehsilList',DEFAULT_TEHSILS);tehsilBlocks=loadObj('pmcTehsilBlocks',DEFAULT_BLOCKS);selectedTehsil=loadObj('pmcSelectedTehsil',profile.tehsil||'Bulandshahr');selectedBlock=loadObj('pmcSelectedBlock',(tehsilBlocks[selectedTehsil]||[])[0]||'');tehsilMarkets=loadObj('pmcTehsilMarkets',{});tehsilShopNames=loadObj('pmcTehsilShopNames',{});tehsilCurrent1=loadObj('pmcTehsilCurrent1',{});tehsilCurrent2=loadObj('pmcTehsilCurrent2',{});marketNames=marketsForTehsil(selectedTehsil);shopNames=shopsForCurrent();dailyEntries=loadObj('pmcDailyEntries',[]);pmcSnapshots1=loadObj('pmcSnapshots1',{});pmcSnapshots2=loadObj('pmcSnapshots2',{});pmcData=loadData(1);pmcData2=loadData(2);renderDashboard();if(document.getElementById('pmcTable')){renderEditable(1);renderEditable(2)}}
+function applyServerState(st){if(!st || userEditing || syncDirty)return;Object.entries(st).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));profile=loadObj('pmcProfile',DEFAULT_PROFILE);tehsilList=loadObj('pmcTehsilList',DEFAULT_TEHSILS);tehsilBlocks=loadObj('pmcTehsilBlocks',DEFAULT_BLOCKS);selectedTehsil=loadObj('pmcSelectedTehsil',profile.tehsil||'Bulandshahr');selectedBlock=loadObj('pmcSelectedBlock',(tehsilBlocks[selectedTehsil]||[])[0]||'');tehsilMarkets=loadObj('pmcTehsilMarkets',{});tehsilShopNames=loadObj('pmcTehsilShopNames',{});tehsilCurrent1=loadObj('pmcTehsilCurrent1',{});tehsilCurrent2=loadObj('pmcTehsilCurrent2',{});marketNames=marketsForTehsil(selectedTehsil);shopNames=shopsForCurrent();dailyEntries=loadObj('pmcDailyEntries',[]);pmcSnapshots1=loadObj('pmcSnapshots1',{});pmcSnapshots2=loadObj('pmcSnapshots2',{});pmcData=loadData(1);pmcData2=loadData(2);renderDashboard();if(document.getElementById('pmcTable')){renderEditable(1);renderEditable(2)}}
 async function syncFromServer(){try{const r=await fetch(API_BASE+'/api/state',{credentials:'include',cache:'no-store'});if(r.ok){const j=await r.json();if(j.state)applyServerState(j.state)}}catch(e){console.warn('Server sync unavailable; using local browser data.')}}
 async function syncToServer(){if(syncBusy||!syncDirty)return;syncBusy=true;try{const r=await fetch(API_BASE+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({state:clientState()})});if(r.ok)syncDirty=false}catch(e){console.warn('Server save unavailable; local data retained.')}finally{syncBusy=false}}
 function scheduleServerSync(){clearTimeout(syncTimer);syncTimer=setTimeout(syncToServer,350)}
 let internetSyncStarted=false, internetSyncTimer=null;
+let userEditing=false;
 function startInternetSync(){
   if(internetSyncStarted)return;
   internetSyncStarted=true;
   syncFromServer();
-  internetSyncTimer=setInterval(()=>{if(!syncDirty)syncFromServer();syncToServer()},60000);
+  internetSyncTimer=setInterval(()=>{
+    // Never redraw/replace the PMC tables while the user is correcting a value.
+    if(!syncDirty && !userEditing && !document.hidden) syncFromServer();
+    if(!userEditing) syncToServer();
+  },60000);
 }
+function beginUserEditing(){userEditing=true;}
+function endUserEditing(){setTimeout(()=>{userEditing=false;},800);}
+function installEditProtection(){
+  document.addEventListener('focusin',e=>{
+    if(e.target && (e.target.matches('.edit-input') || e.target.matches('.market-name') || e.target.closest('#pmcTable,#pmc2Table'))) beginUserEditing();
+  });
+  document.addEventListener('focusout',e=>{
+    if(e.target && e.target.matches('.edit-input,.market-name')) endUserEditing();
+  });
+  document.addEventListener('input',e=>{
+    if(e.target && e.target.matches('.edit-input')) userEditing=true;
+  });
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden && !userEditing && !syncDirty) syncFromServer(); });
+}
+
 function todayISO(){return new Date().toISOString().slice(0,10)}
 function formatDate(d){if(!d)return '';const [y,m,day]=String(d).split('-');return day&&m&&y?`${day}-${m}-${y}`:String(d)}
 function getDateInput(which){return document.getElementById('pmcDate'+which)}
@@ -488,6 +510,7 @@ function setCombinedReportToday(){const el=document.getElementById('reportDate')
 function loadCombinedReportDate(){const tel=document.getElementById('reportTehsil');if(tel&&tel.value&&tel.value!==selectedTehsil){selectedTehsil=tel.value;marketNames=marketsForTehsil(selectedTehsil)}const d=document.getElementById('reportDate')?.value||todayISO();const a=pmcSnapshots1[snapshotKey(selectedTehsil,d)] || (selectedTehsil==='Bulandshahr'?pmcSnapshots1[d]:null),b=pmcSnapshots2[snapshotKey(selectedTehsil,d)] || (selectedTehsil==='Bulandshahr'?pmcSnapshots2[d]:null);const el=document.getElementById('reportDateStatus');if(el)el.textContent=(a||b)?'Back-date report data available for '+formatDate(d):'No saved PMC snapshot for '+formatDate(d)+'; current data will be used.';if(a){pmcData=structuredClone(a.rows);if(a.markets){marketNames=structuredClone(a.markets);saveObj('pmcTehsilMarkets',Object.assign(tehsilMarkets,{[selectedTehsil]:structuredClone(marketNames)}))}}if(b){pmcData2=structuredClone(b.rows);if(b.markets){marketNames=structuredClone(b.markets);saveObj('pmcTehsilMarkets',Object.assign(tehsilMarkets,{[selectedTehsil]:structuredClone(marketNames)}))}}renderEditable(1);renderEditable(2)}
 function applyTableOptions(){[1,2].forEach(which=>{const root=document.getElementById(which===1?'pmcTable':'pmc2Table')?.closest('.table-wrap');if(root){root.classList.add('editable-wrap');root.style.setProperty('--table-align',document.getElementById('align'+which)?.value||'center');root.style.setProperty('--table-font',(document.getElementById('fontSize'+which)?.value||6)+'px')}})}
 function fetchLivePrices(){if(!navigator.onLine){return}const status=document.getElementById('tehsilSlide');fetch(API_BASE+'/api/live-prices?district=Bulandshahr',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{if(j.ok&&j.items?.length){const x=j.items.slice(0,6).map(a=>`${a.market||'Market'} — ${a.commodity||''}: ₹${a.price??'—'}`).join('  •  ');status.textContent=x;window.livePriceData=j.items;renderDashboard()}}).catch(()=>{});}
+installEditProtection();
 document.getElementById('commodity').onchange=renderDashboard;document.getElementById('market').onchange=renderDashboard;loadProfile();populateTehsilSelectors();renderHistory();if(sessionStorage.getItem('pmcLoggedIn')==='1'){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block'}renderEditable(1);renderEditable(2);initReportDate(1);initReportDate(2);updateReportLiveClock();clearInterval(reportClockTimer);reportClockTimer=setInterval(updateReportLiveClock,1000);renderDashboard();initCombinedReportDate();applyTableOptions();['1','2'].forEach(w=>{document.getElementById('align'+w)?.addEventListener('change',applyTableOptions);document.getElementById('fontSize'+w)?.addEventListener('input',applyTableOptions)});fetchLivePrices();setInterval(fetchLivePrices,60000);startLive();updateConnectionStatus();if(sessionStorage.getItem('pmcLoggedIn')==='1')startInternetSync();
 </script>
 <script>
