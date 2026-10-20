@@ -105,7 +105,7 @@ table{min-width:620px}
 <section id="pmc" class="page">
 <div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">PMC Data / 23 वस्तुएँ</span></div><div class="panel pmc-head"><div class="toolbar" style="justify-content:space-between"><div><h2>📄 PMC Data — 23 वस्तुएँ</h2><p class="muted">Date चुनकर उस दिन की saved entry खोलें। आज की तारीख live रहेगी और पुरानी तारीख की entry भी निकाली जा सकती है।</p></div><div class="toolbar"><button class="success" onclick="saveData(1)">💾 Save Changes</button><button onclick="downloadPdf(1)">📥 PDF</button><button onclick="downloadExcel(1)">📊 Excel</button></div></div>
 <div class="filters" style="margin:12px 0"><label>Tehsil<select id="pmcTehsil1" onchange="changePmcTehsil(1)"></select></label><label>Block<select id="pmcBlock1" onchange="changePmcBlock(1)"></select></label><button type="button" class="secondary" onclick="addTehsil()">➕ Add Tehsil</button><button type="button" class="secondary" onclick="addBlock()">➕ Add Block</button><span class="small muted">Shop names are saved block-wise with the selected market.</span><label>PMC Date<input type="date" id="pmcDate1" onchange="loadReportDate(1)"></label><button type="button" onclick="setReportToday(1)">📅 Today / Live Date</button><span id="pmcLiveDate1" class="live-clock" style="align-self:center"></span><span id="pmcDateStatus1" class="small muted" style="align-self:center"></span></div><div class="pdf-controls"><label>PDF Border <select id="pdfBorder1"><option value="1">Dark</option><option value="0.55" selected>Light</option><option value="0.25">Very Light</option></select></label><label>Font Size <input id="fontSize1" type="number" min="5" max="14" step="0.5" value="6"></label><label>Alignment <select id="align1"><option value="left">Left</option><option value="center" selected>Center</option><option value="right">Right</option></select></label><label>Market + Shop PDF Wrap <select id="pdfWrap1"><option value="auto" selected>Auto Wrap</option><option value="wrap">Wrap</option><option value="nowrap">No Wrap</option></select></label></div>
-<div class="panel" style="padding:12px;margin-top:15px"><div class="toolbar" style="justify-content:space-between"><b>Editable 23-Commodity Table</b><span class="small muted">Market-1/2/3, Retail Average और Wholesale values edit करें</span></div><div class="table-wrap"><table><thead><tr><th>S.No.</th><th>Commodity & Specifications</th><th>Unit</th><th>Market-1</th><th>Market-2</th><th>Market-3</th><th>Retail Avg.</th><th>Wholesale Market Price</th></tr></thead><tbody id="pmcTable"></tbody></table></div></div>
+<div class="panel" style="padding:12px;margin-top:15px"><div class="toolbar" style="justify-content:space-between"><b>Editable 23-Commodity Table</b><span class="small muted">Market-1/2/3, Retail Average और Wholesale values edit करें</span><button type="button" class="secondary" onclick="applyAgautaRatesAllBlocks()">📥 28-08-2026 Rates सभी Blocks में Feed करें</button></div><div class="table-wrap"><table><thead><tr><th>S.No.</th><th>Commodity & Specifications</th><th>Unit</th><th>Market-1</th><th>Market-2</th><th>Market-3</th><th>Retail Avg.</th><th>Wholesale Market Price</th></tr></thead><tbody id="pmcTable"></tbody></table></div></div>
 <div class="panel"><div class="toolbar" style="justify-content:space-between"><h3>👁️ Original PMC PDF</h3><button class="secondary" onclick="toggleOriginal(1)">Hide / Show</button></div><div id="original1" class="hidden"><iframe class="pdf-frame" src="pmc/pmc-file-one.pdf"></iframe></div></div></div>
 </section>
 
@@ -120,8 +120,8 @@ table{min-width:620px}
 <section id="reports" class="page"><div class="backbar"><button class="secondary" onclick="showPage('dashboard')">← Back</button><span class="muted">Reports</span></div><div class="panel"><h2>📥 Combined Reports</h2><p class="muted">23 वस्तुओं की PDF एक ही A4 landscape page में और Additional report अलग page/section में download करें। Excel में भी दोनों अलग-अलग sheets में मिलेंगे।</p><div class="filters"><label>Tehsil<select id="reportTehsil" onchange="changeReportTehsil()"></select></label><label>Block<select id="reportBlock" onchange="changeReportBlock()"></select></label><label>Report Date<input type="date" id="reportDate" onchange="loadCombinedReportDate()"></label><button onclick="setCombinedReportToday()">📅 Today / Live Date</button><span id="reportDateStatus" class="small muted"></span></div><div class="toolbar"><button class="success" onclick="downloadCombinedPdf()">📥 Download Combined PDF</button><button onclick="downloadCombinedExcel()">📊 Download Combined Excel</button></div><div class="notice"><b>PDF structure:</b> Page/Section 1 = 23 वस्तु PMC • Page/Section 2 = Additional PMC. प्रत्येक section पर office/form header रहेगा।</div></div></section>
 </div><div class="footer">Price Monitoring AI • Internet Live Mode • Shared data server/database पर sync होता है • Browser में temporary cache भी रहता है</div></div>
 <script>
-const DEFAULT1=[[1,"Rice (Loose)","1KG",40,42,40,41,3550],[2,"Wheat (Loose)","1KG",26,26,26,26,2460],[3,"Atta (Wheat) (Loose)","1KG",30,32,30,31,2900],[4,"Gram Dal (Loose)","1KG",75,76,75,76,7450],[5,"Tur/Arhar Dal (Loose)","1KG",90,92,90,91,9000],[6,"Urad Dal (Split (washed, Dhuli) (Loose)","1KG",90,92,92,91,9000],[7,"Moong Dal","1KG",90,90,90,90,8800],[8,"Masoor Dal (Split washed, Dhuli) (loose)","1KG",80,80,80,80,7660],[9,"Broken Rice","1KG",45,44,45,44,3600],[10,"Groundnut Oil (Packed)*","1KG",0,0,0,0,0],[11,"Mustard Oil (Packed)*","1KG",170,175,172,173,16000],[12,"Vanaspati Oil (Packed)*","1KG",150,155,155,153,14000],[13,"Soya Oil (Packed)*","1KG",160,155,160,158,15500],[14,"Sunflower Oil (Packed)*","1KG",155,150,154,152,14500],[15,"Palm Oil (Packed)*","1KG",154,159,154,156,13297],[16,"Potato","1KG",20,20,20,20,1400],[17,"Onion","1KG",40,40,40,40,3500],[18,"Tomato","1KG",40,45,45,45,3460],[19,"Sugar (Loose)","1KG",45,50,45,46,4450],[20,"Gur (Loose)","1KG",50,48,50,49,4500],[21,"Milk* (Liquid)","1ltr",70,68,70,69,6700],[22,"Tea (Loose)","1KG",200,200,200,203,19500],[23,"Salt Pack (Iodised)","1KG",0,0,0,0,0]];
-const DEFAULT2=[[1,"Brinjal","1 KG",20,20,20,20,20],[2,"Black Pepper","100 gm",0,0,0,0,0],[3,"Coriander (Whole dry medium quality)","250 gm",45,45,45,45,45],[4,"Cummin seed (Whole medium quality)","250 gm",0,0,0,0,0],[5,"Red chillies (Dry loose with stem)","100 gm",30,29,30,30,30],[6,"Turmeric (Powder, Brand to be indicated by respective centre on PMS App)","50 gm",13,14,14,14,14],[7,"Banana","1 KG",28,28,28,28,28],[8,"Ginger","250 gm",40,40,40,40,40],[9,"Garlic","250 gm",42,40,40,41,41],[10,"Bajra (whole)","1 KG",35,35,36,35,35],[11,"Jowar (whole)","1 KG",36,40,40,39,39],[12,"Maida (Wheat)","1 KG",35,35,35,35,35],[13,"Ragi (whole)","1 KG",0,0,0,0,0],[14,"Suji (whole)","1 KG",35,35,35,35,35],[15,"Besan","1 KG",0,0,0,0,0],[16,"Desi Ghee (Packed) (Brand to be indicated by respective centre on PMS App)","1 Ltr",560,565,560,562,662],[17,"Butter (Pasteurised, Salted)","100 gm",57,56,57,57,57],[18,"Egg (Farm egg medium size)","1 Dozen",72,72,72,72,72]];
+const DEFAULT1=[[1,"Rice (Loose)","1KG",40,42,40,41,3550],[2,"Wheat (Loose)","1KG",26,26,26,26,2460],[3,"Atta (Wheat) (Loose)","1KG",30,32,30,31,2900],[4,"Gram Dal (Loose)","1KG",75,76,75,75,7450],[5,"Tur/Arhar Dal (Loose)","1KG",90,92,90,91,9000],[6,"Urad Dal (Split, Dhuli)","1KG",90,92,92,91,9000],[7,"Moong Dal","1KG",90,90,90,90,8800],[8,"Masoor Dal (Dhuli)","1KG",80,80,80,80,7660],[9,"Broken Rice","1KG",45,44,45,45,3600],[10,"Groundnut Oil (Packed)","1KG",0,0,0,0,0],[11,"Mustard Oil (Packed)","1KG",170,175,172,172,16000],[12,"Vanaspati Oil (Packed)","1KG",150,155,155,153,14000],[13,"Soya Oil (Packed)","1KG",160,155,160,158,15500],[14,"Sunflower Oil (Packed)","1KG",155,150,154,153,14500],[15,"Palm Oil (Packed)","1KG",154,159,154,156,13297],[16,"Potato","1KG",20,20,20,20,1400],[17,"Onion","1KG",40,40,40,40,3500],[18,"Tomato","1KG",40,45,45,43,3460],[19,"Sugar (Loose)","1KG",45,50,45,47,4450],[20,"Gur (Loose)","1KG",50,48,50,49,4500],[21,"Milk (Liquid)","1ltr",70,68,70,69,6700],[22,"Tea (Loose)","1KG",200,200,200,200,19500],[23,"Salt Pack (Iodised)","1KG",20,18,19,19,1800]];
+const DEFAULT2=[[1,"Brinjal","1 KG",20,20,20,20,20],[2,"Black Pepper","100 gm",85,88,88,87,0],[3,"Coriander (Whole dry medium quality)","250 gm",30,30,30,30,0],[4,"Cummin seed (Whole medium quality)","250 gm",45,45,45,45,0],[5,"Red chillies (Dry loose with stem)","100 gm",25,27,28,27,0],[6,"Turmeric (Powder, brand to be indicated in PMS App)","50 gm",15,14,15,15,0],[7,"Banana","1 KG",33,32,30,32,0],[8,"Ginger","250 gm",40,40,40,40,0],[9,"Garlic","250 gm",42,40,40,41,0],[10,"Bajra (whole)","1 KG",35,35,36,35,0],[11,"Jowar (whole)","1 KG",36,40,40,39,0],[12,"Maida (Wheat)","1 KG",35,35,35,35,0],[13,"Ragi (whole)","1 KG",56,56,56,56,0],[14,"Suji (whole)","1 KG",35,35,35,35,0],[15,"Besan","1 KG",98,100,100,99,0],[16,"Desi Ghee (Packed, brand to be indicated in PMS App)","1 Ltr",560,565,560,562,0],[17,"Butter (Pasteurised, Salted)","100 gm",57,56,57,57,0],[18,"Egg (Farm egg medium size)","1 Dozen",90,88,88,89,0]];
 const dashboardData=[["2026-08-21","Bulandshahr","गेहूँ",32],["2026-08-21","Bulandshahr","चावल",42],["2026-08-21","Bulandshahr","अरहर दाल",120],["2026-08-21","Bulandshahr","सरसों तेल",145],["2026-08-21","Bulandshahr","प्याज",35],["2026-08-22","Bulandshahr","गेहूँ",33],["2026-08-22","Bulandshahr","चावल",43],["2026-08-22","Bulandshahr","अरहर दाल",122],["2026-08-22","Bulandshahr","सरसों तेल",148],["2026-08-22","Bulandshahr","प्याज",36],["2026-08-23","Bulandshahr","गेहूँ",34],["2026-08-23","Bulandshahr","चावल",44],["2026-08-23","Bulandshahr","अरहर दाल",125],["2026-08-23","Bulandshahr","सरसों तेल",150],["2026-08-23","Bulandshahr","प्याज",37],["2026-08-24","Bulandshahr","गेहूँ",34],["2026-08-24","Bulandshahr","चावल",44],["2026-08-24","Bulandshahr","अरहर दाल",125],["2026-08-24","Bulandshahr","सरसों तेल",150],["2026-08-24","Bulandshahr","प्याज",38],["2026-08-25","Bulandshahr","गेहूँ",35],["2026-08-25","Bulandshahr","चावल",44],["2026-08-25","Bulandshahr","अरहर दाल",127],["2026-08-25","Bulandshahr","सरसों तेल",152],["2026-08-25","Bulandshahr","प्याज",41]];
 const DEFAULT_PROFILE={state:'UTTAR PRADESH',centre:'BULANDSHAHR',office:'Price Monitoring / Food & Civil Supplies',operator:'SURAJ KUMAR',mobile:'9791210142',email:'ranasuraj328@gmail.com',designation:'Data Entry Operator / Price Collector',address:'Bulandshahr, Uttar Pradesh',tehsil:'Bulandshahr'};
 const DEFAULT_MARKETS={m1:'Market-1',m2:'Market-2',m3:'Market-3'};
@@ -187,7 +187,7 @@ function shopsForCurrent(){
   }
   return {s1:'',s2:'',s3:''};
 }
-function saveShopNames(){tehsilShopNames[selectedTehsil+'|'+selectedBlock]=structuredClone(shopNames);saveObj('pmcTehsilShopNames',tehsilShopNames)}
+function saveShopNames(){tehsilShopNames[selectedTehsil+'|'+selectedBlock]=structuredClone(shopNames);saveObj('pmcTehsilShopNames',tehsilShopNames);scheduleServerSync()}
 function setShopName(n,v){shopNames['s'+n]=String(v||'').trim();saveShopNames()}
 function blocksForTehsil(t){return structuredClone(tehsilBlocks[t]||DEFAULT_BLOCKS[t]||[])}
 function populateBlockSelectors(){[1,2].forEach(w=>{const el=document.getElementById('pmcBlock'+w);if(!el)return;const list=blocksForTehsil(selectedTehsil);el.innerHTML=list.map(b=>`<option value="${String(b).replaceAll('\"','&quot;')}">${b}</option>`).join('');el.value=selectedBlock;});const rel=document.getElementById('reportBlock');if(rel){const list=blocksForTehsil(selectedTehsil);rel.innerHTML=list.map(b=>`<option value="${String(b).replaceAll('\"','&quot;')}">${b}</option>`).join('');rel.value=selectedBlock;}}
@@ -271,6 +271,32 @@ function renderEditable(which){
   }).join('');
 }
 function setMarketName(n,v){marketNames['m'+n]=v.trim()||('Market-'+n);saveTehsilMarkets();renderEditable(1);renderEditable(2)}
+function applyAgautaRatesAllBlocks(){
+  const date='2026-08-28';
+  const ok=confirm('28-08-2026 के Agauta rates सभी Tehsil/Block में PMC 23 + Additional 18 के लिए feed होंगे। यह सभी blocks की मौजूदा table values को replace करेगा। क्या जारी रखें?');
+  if(!ok)return;
+  const allTehsils=[...new Set([...(tehsilList||[]),...DEFAULT_TEHSILS])];
+  let total=0;
+  allTehsils.forEach(t=>{
+    const blocks=[...new Set([...(tehsilBlocks[t]||[]),...(DEFAULT_BLOCKS[t]||[])])];
+    blocks.forEach(b=>{
+      const key=t+'|'+b;
+      const rows1=structuredClone(DEFAULT1), rows2=structuredClone(DEFAULT2);
+      tehsilCurrent1[key]=rows1;tehsilCurrent2[key]=rows2;
+      pmcSnapshots1[key+'__'+date]={rows:structuredClone(rows1),markets:structuredClone(DEFAULT_BLOCK_MARKETS[b]||DEFAULT_MARKETS),tehsil:t,block:b,date,savedAt:new Date().toISOString(),source:'Agauta PMC table supplied by user'};
+      pmcSnapshots2[key+'__'+date]={rows:structuredClone(rows2),markets:structuredClone(DEFAULT_BLOCK_MARKETS[b]||DEFAULT_MARKETS),tehsil:t,block:b,date,savedAt:new Date().toISOString(),source:'Agauta PMC table supplied by user'};
+      total++;
+    });
+  });
+  saveObj('pmcTehsilCurrent1',tehsilCurrent1);saveObj('pmcTehsilCurrent2',tehsilCurrent2);
+  saveObj('pmcSnapshots1',pmcSnapshots1);saveObj('pmcSnapshots2',pmcSnapshots2);
+  saveObj('pmcEditable1',DEFAULT1);saveObj('pmcEditable2',DEFAULT2);
+  const targetKey=selectedTehsil+'|'+selectedBlock;
+  pmcData=structuredClone(tehsilCurrent1[targetKey]||DEFAULT1);pmcData2=structuredClone(tehsilCurrent2[targetKey]||DEFAULT2);
+  renderEditable(1);renderEditable(2);populateCommodityFilter();renderDashboard();
+  if(typeof scheduleServerSync==='function')scheduleServerSync();
+  alert('Feed complete: '+total+' blocks में 23 मुख्य + 18 Additional वस्तुएँ, दिनांक 28-08-2026. Server sync उपलब्ध होने पर डेटा sync होगा.');
+}
 function saveData(which){
   const rows=which===1?pmcData:pmcData2, root=document.getElementById(which===1?'pmcTable':'pmc2Table');
   root.querySelectorAll('.edit-input:not(.avg-input)').forEach(inp=>{
@@ -287,8 +313,6 @@ function saveData(which){
   saveObj(which===1?'pmcSnapshots1':'pmcSnapshots2',snapshots);
   renderEditable(which);populateCommodityFilter();renderDashboard();
   updateReportStatus(which,`Saved for ${selectedTehsil} / ${formatDate(date)} — tehsil-wise entry available.`);
-  // Explicit Save Changes is the only point at which data is sent to the shared server.
-  syncToServer();
   alert(`Changes saved successfully for ${selectedTehsil} — ${formatDate(date)}.`);
 }
 function officeHeader(doc,title,subtitle,dateText){
@@ -390,36 +414,18 @@ window.addEventListener('online',updateConnectionStatus);window.addEventListener
 
 let syncTimer=null, syncBusy=false, syncDirty=false;
 function loadObj(key,def){try{const x=localStorage.getItem(key);return x?JSON.parse(x):structuredClone(def)}catch{return structuredClone(def)}}
-function saveObj(key,val){
-  // Local draft only. Do NOT sync while the user is typing/editing.
-  // Server is updated only by an explicit Save action.
-  localStorage.setItem(key,JSON.stringify(val));
-  syncDirty=true;
-}
+function saveObj(key,val){localStorage.setItem(key,JSON.stringify(val)); syncDirty=true; scheduleServerSync()}
 function clientState(){const keys=['pmcEditable1','pmcEditable2','pmcProfile','pmcMarkets','pmcTehsilList','pmcSelectedTehsil','pmcSelectedBlock','pmcTehsilBlocks','pmcTehsilMarkets','pmcTehsilShopNames','pmcTehsilCurrent1','pmcTehsilCurrent2','pmcDailyEntries','pmcSnapshots1','pmcSnapshots2'];const out={};keys.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)out[k]=JSON.parse(v)});return out}
 function applyServerState(st){if(!st)return;Object.entries(st).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));profile=loadObj('pmcProfile',DEFAULT_PROFILE);tehsilList=loadObj('pmcTehsilList',DEFAULT_TEHSILS);tehsilBlocks=loadObj('pmcTehsilBlocks',DEFAULT_BLOCKS);selectedTehsil=loadObj('pmcSelectedTehsil',profile.tehsil||'Bulandshahr');selectedBlock=loadObj('pmcSelectedBlock',(tehsilBlocks[selectedTehsil]||[])[0]||'');tehsilMarkets=loadObj('pmcTehsilMarkets',{});tehsilShopNames=loadObj('pmcTehsilShopNames',{});tehsilCurrent1=loadObj('pmcTehsilCurrent1',{});tehsilCurrent2=loadObj('pmcTehsilCurrent2',{});marketNames=marketsForTehsil(selectedTehsil);shopNames=shopsForCurrent();dailyEntries=loadObj('pmcDailyEntries',[]);pmcSnapshots1=loadObj('pmcSnapshots1',{});pmcSnapshots2=loadObj('pmcSnapshots2',{});pmcData=loadData(1);pmcData2=loadData(2);renderDashboard();if(document.getElementById('pmcTable')){renderEditable(1);renderEditable(2)}}
-async function syncFromServer(){
-  // Never let a background response overwrite unsaved user edits.
-  if(syncDirty)return;
-  try{
-    const r=await fetch(API_BASE+'/api/state',{credentials:'include',cache:'no-store'});
-    if(r.ok){
-      const j=await r.json();
-      if(!syncDirty && j.state)applyServerState(j.state);
-    }
-  }catch(e){console.warn('Server sync unavailable; using local browser data.')}
-}
+async function syncFromServer(){try{const r=await fetch(API_BASE+'/api/state',{credentials:'include',cache:'no-store'});if(r.ok){const j=await r.json();if(j.state)applyServerState(j.state)}}catch(e){console.warn('Server sync unavailable; using local browser data.')}}
 async function syncToServer(){if(syncBusy||!syncDirty)return;syncBusy=true;try{const r=await fetch(API_BASE+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({state:clientState()})});if(r.ok)syncDirty=false}catch(e){console.warn('Server save unavailable; local data retained.')}finally{syncBusy=false}}
-function scheduleServerSync(){ /* Disabled: server sync happens only after explicit Save. */ }
+function scheduleServerSync(){clearTimeout(syncTimer);syncTimer=setTimeout(syncToServer,350)}
 let internetSyncStarted=false, internetSyncTimer=null;
 function startInternetSync(){
   if(internetSyncStarted)return;
   internetSyncStarted=true;
-  // Load the shared state once at login/page start.
-  // Do not poll the server while the user is entering/correcting data.
   syncFromServer();
-  clearInterval(internetSyncTimer);
-  internetSyncTimer=null;
+  internetSyncTimer=setInterval(()=>{if(!syncDirty)syncFromServer();syncToServer()},60000);
 }
 function todayISO(){return new Date().toISOString().slice(0,10)}
 function formatDate(d){if(!d)return '';const [y,m,day]=String(d).split('-');return day&&m&&y?`${day}-${m}-${y}`:String(d)}
@@ -474,9 +480,9 @@ function loadReportDate(which){
   renderEditable(which);
 }
 function loadProfile(){Object.keys(DEFAULT_PROFILE).forEach(k=>{const el=document.getElementById('p'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.value=profile[k]??''})}
-function saveProfile(){Object.keys(DEFAULT_PROFILE).forEach(k=>{const el=document.getElementById('p'+k.charAt(0).toUpperCase()+k.slice(1));if(el)profile[k]=el.value.trim()});saveObj('pmcProfile',profile);syncToServer();alert('Profile saved. अब generated PDF में updated profile/header दिखेगा।')}
+function saveProfile(){Object.keys(DEFAULT_PROFILE).forEach(k=>{const el=document.getElementById('p'+k.charAt(0).toUpperCase()+k.slice(1));if(el)profile[k]=el.value.trim()});saveObj('pmcProfile',profile);alert('Profile saved. अब generated PDF में updated profile/header दिखेगा।')}
 function loadDailyFromCurrent(){document.getElementById('entryDate').value=new Date().toISOString().slice(0,10);document.getElementById('entryTehsil').value=selectedTehsil||profile.tehsil||'Bulandshahr';document.getElementById('dailyM1').value=marketNames.m1;document.getElementById('dailyM2').value=marketNames.m2;document.getElementById('dailyM3').value=marketNames.m3;const rows=allCommodities();document.getElementById('dailyTable').innerHTML=rows.map((r,i)=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td><input class="edit-input" id="d1_${i}" value="${r[3]||0}"></td><td><input class="edit-input" id="d2_${i}" value="${r[4]||0}"></td><td><input class="edit-input" id="d3_${i}" value="${r[5]||0}"></td><td><input class="edit-input" id="da_${i}" value="${r[6]||0}"></td></tr>`).join('')}
-function saveDailyEntry(){const rows=allCommodities().map((r,i)=>{const a=Number(document.getElementById('d1_'+i).value)||0,b=Number(document.getElementById('d2_'+i).value)||0,c=Number(document.getElementById('d3_'+i).value)||0;return [r[0],r[1],r[2],a,b,c,calcAverage([0,'','',a,b,c,0])];});marketNames={m1:document.getElementById('dailyM1').value||'Market-1',m2:document.getElementById('dailyM2').value||'Market-2',m3:document.getElementById('dailyM3').value||'Market-3'};saveObj('pmcMarkets',marketNames);const item={date:document.getElementById('entryDate').value,tehsil:document.getElementById('entryTehsil').value||'Bulandshahr',note:document.getElementById('entryNote').value||'',markets:structuredClone(marketNames),rows};dailyEntries=dailyEntries.filter(x=>x.date!==item.date||x.tehsil!==item.tehsil);dailyEntries.push(item);dailyEntries.sort((a,b)=>a.date.localeCompare(b.date));saveObj('pmcDailyEntries',dailyEntries);renderHistory();renderDashboard();renderEditable(1);renderEditable(2);syncToServer();alert('Day-wise entry saved successfully. Dashboard live data update हो गया।')}
+function saveDailyEntry(){const rows=allCommodities().map((r,i)=>{const a=Number(document.getElementById('d1_'+i).value)||0,b=Number(document.getElementById('d2_'+i).value)||0,c=Number(document.getElementById('d3_'+i).value)||0;return [r[0],r[1],r[2],a,b,c,calcAverage([0,'','',a,b,c,0])];});marketNames={m1:document.getElementById('dailyM1').value||'Market-1',m2:document.getElementById('dailyM2').value||'Market-2',m3:document.getElementById('dailyM3').value||'Market-3'};saveObj('pmcMarkets',marketNames);const item={date:document.getElementById('entryDate').value,tehsil:document.getElementById('entryTehsil').value||'Bulandshahr',note:document.getElementById('entryNote').value||'',markets:structuredClone(marketNames),rows};dailyEntries=dailyEntries.filter(x=>x.date!==item.date||x.tehsil!==item.tehsil);dailyEntries.push(item);dailyEntries.sort((a,b)=>a.date.localeCompare(b.date));saveObj('pmcDailyEntries',dailyEntries);renderHistory();renderDashboard();renderEditable(1);renderEditable(2);alert('Day-wise entry saved successfully. Dashboard live data update हो गया।')}
 function renderHistory(){const el=document.getElementById('historyTable');if(!el)return;el.innerHTML=dailyEntries.slice().reverse().map((d,i)=>`<tr><td>${d.date}</td><td>${d.tehsil}</td><td>${d.markets?.m1||''}</td><td>${d.markets?.m2||''}</td><td>${d.markets?.m3||''}</td><td>${d.rows.length}</td><td><button onclick="loadHistory('${d.date}','${String(d.tehsil).replaceAll("'","\'")}')">Load</button></td></tr>`).join('')}
 function loadHistory(date,tehsil){const d=dailyEntries.find(x=>x.date===date&&x.tehsil===tehsil);if(!d)return;document.getElementById('entryDate').value=d.date;document.getElementById('entryTehsil').value=d.tehsil;document.getElementById('dailyM1').value=d.markets.m1;document.getElementById('dailyM2').value=d.markets.m2;document.getElementById('dailyM3').value=d.markets.m3;d.rows.forEach((r,i)=>{['d1_','d2_','d3_','da_'].forEach((p,j)=>{const el=document.getElementById(p+i);if(el)el.value=r[3+j]??0})});window.scrollTo({top:0,behavior:'smooth'})}
 function clearDailyForm(){document.getElementById('entryNote').value='';loadDailyFromCurrent()}

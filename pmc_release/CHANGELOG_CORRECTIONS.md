@@ -22,3 +22,10 @@ Important:
 
 ## 2026-09-22: Bulandshahr 7 Tehsil / Block-wise Markets
 PMC now uses 7 tehsils: Bulandshahr, Shikarpur, Dibai, Anupshahr, Khurja, Syana, Sikandrabad. Block dropdowns are preloaded from the supplied block list and each block has 3 default market names.
+
+
+## 2026-10-18 — Agauta PMC rates bulk feed
+- Updated default 23 main and 18 Additional rows to the supplied 28-08-2026 Agauta table.
+- Added an explicit bulk-feed button to apply these rates to every configured tehsil/block and save dated snapshots.
+- Bulk feed requires confirmation because it replaces existing block table values.
+- Additional rows do not have wholesale values in the supplied table, so those fields remain 0/not supplied.
