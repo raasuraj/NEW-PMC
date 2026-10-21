@@ -1,31 +1,7 @@
-# Price Monitoring AI — Corrections Applied
 
-Updated build includes:
-1. District/Tehsil/Block hierarchy retained and strengthened.
-2. Block-wise Market + Shop Name fields for Market-1, Market-2 and Market-3.
-3. Shop names are stored separately for each Tehsil + Block and sync through the existing backend state.
-4. Jahangirabad/Jahangirabad default shop names prefilled:
-   - PURANI KOTWALI KE PASS JAHANGIRABAD
-   - LAL KUAN JAHANGIRABAD
-   - KILE KE PASS JAHANGIRABAD
-5. Retail Average remains automatic and is not manually saved.
-6. Missing market-price warning appears when one or more retail prices are blank/zero.
-7. PDF headers now include Market + Shop names.
-8. 23-commodity and Additional PMC tables continue to support date-wise, tehsil-wise and block-wise data.
-9. AI Fetch continues to send selected Tehsil + Block to the backend.
-10. Existing Online + Offline Hybrid architecture and Render backend are preserved.
-
-Important:
-- This ZIP is the updated source project. Upload its files to the GitHub repository, replacing the old site/index.html and related project files.
-- If using Render, redeploy the backend so the latest frontend/backend state format is active.
-
-
-## 2026-09-22: Bulandshahr 7 Tehsil / Block-wise Markets
-PMC now uses 7 tehsils: Bulandshahr, Shikarpur, Dibai, Anupshahr, Khurja, Syana, Sikandrabad. Block dropdowns are preloaded from the supplied block list and each block has 3 default market names.
-
-
-## 2026-10-18 — Agauta PMC rates bulk feed
-- Updated default 23 main and 18 Additional rows to the supplied 28-08-2026 Agauta table.
-- Added an explicit bulk-feed button to apply these rates to every configured tehsil/block and save dated snapshots.
-- Bulk feed requires confirmation because it replaces existing block table values.
-- Additional rows do not have wholesale values in the supplied table, so those fields remain 0/not supplied.
+## User-requested updates (2026-10-21)
+- Removed the bulk "28-08-2026 Rates सभी Blocks में Feed करें" action and its overwrite-all-blocks function.
+- Disabled recurring live-price refresh and periodic server-state pulls that could redraw/overwrite unsaved data. Dashboard data is refreshed after Save Changes; saved changes are pushed to the server.
+- Date fields now allow selecting a later date, so the same rates can be saved again for another date as a separate dated snapshot.
+- Added Block Data Transfer controls for both the 23-item PMC table and the 18-item Additional table. Transfer copies the selected table into a chosen existing tehsil/block for the selected date.
+- Added a "Fit table to one page" option to both PDF export controls, using compact text and cell spacing.
